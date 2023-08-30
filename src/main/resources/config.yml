@@ -1,3 +1,16 @@
+auto-save-time: 300
+storage-name: Storage
+storage-item-suffix:
+  - ""
+  - "<color:gray>(Click: get item)"
+inventory-small-message: "<color:red>your inventory space is so small to get this item!"
+
+time-format:
+  day: "%dd"
+  hour: "%dh"
+  minute: "%dm"
+  second: "%ds"
+
 database:
   #yml, mysql
   using: yml

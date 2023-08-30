@@ -1,14 +1,16 @@
-package kor.toxicity.toxicitylibs;
+package kor.toxicity.toxicitylibs.plugin;
 
 import kor.toxicity.toxicitylibs.api.ComponentReader;
-import kor.toxicity.toxicitylibs.api.LibsConfig;
+import kor.toxicity.toxicitylibs.api.ToxicityConfig;
 import kor.toxicity.toxicitylibs.api.ToxicityPlugin;
 import kor.toxicity.toxicitylibs.api.command.CommandAPI;
 import kor.toxicity.toxicitylibs.api.command.SenderType;
-import kor.toxicity.toxicitylibs.util.ConfigUtil;
-import kor.toxicity.toxicitylibs.util.StringUtil;
-import kor.toxicity.toxicitylibs.util.data.PlayerData;
-import kor.toxicity.toxicitylibs.util.database.DatabaseSupplier;
+import kor.toxicity.toxicitylibs.api.util.TimeFormat;
+import kor.toxicity.toxicitylibs.plugin.util.ConfigUtil;
+import kor.toxicity.toxicitylibs.plugin.util.StringUtil;
+import kor.toxicity.toxicitylibs.plugin.util.data.ItemData;
+import kor.toxicity.toxicitylibs.plugin.util.data.PlayerData;
+import kor.toxicity.toxicitylibs.plugin.util.database.DatabaseSupplier;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
@@ -31,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ToxicityLibs extends ToxicityPlugin {
     private static ToxicityPlugin libs;
     private static final Map<UUID,PlayerThread> PLAYER_THREAD_MAP = new ConcurrentHashMap<>();
+
 
     private final CommandAPI commandAPI = new CommandAPI("<gradient:blue-aqua>[ToxicityLibs]")
             .setCommandPrefix("tc")
@@ -59,27 +62,69 @@ public final class ToxicityLibs extends ToxicityPlugin {
             .setPermission(new String[] {"toxicitylibs.placeholder"})
             .setLength(1)
             .setAllowedSender(new SenderType[] {SenderType.PLAYER})
-            .setExecutor((c,a) -> {
-                try {
-                    c.sendMessage(new ComponentReader(String.join(" ",a)).buildPlaceholders((Player) c));
-                } catch (Throwable throwable) {
-                    getCommandAPI().message(c,"PlaceholderAPI not found!");
-                }
-            })
+            .setExecutor((c,a) -> c.sendMessage(new ComponentReader(String.join(" ",a)).buildPlaceholders((Player) c)))
             .build()
-            ;
+            //give
+            .create("give")
+            .setAliases(new String[] {"g"})
+            .setDescription("give handheld item to some player.")
+            .setUsage("give <player> [second]")
+            .setLength(1)
+            .setPermission(new String[] {"toxicitylibs.give"})
+            .setAllowedSender(new SenderType[] {SenderType.PLAYER})
+            .setExecutor((c,a) -> {
+                var item = ((Player) c).getInventory().getItemInMainHand();
+                Long left = null;
+                var target = Bukkit.getOfflinePlayer(a[0]);
+                if (a.length > 1) {
+                    try {
+                        left = Long.parseLong(a[1]);
+                    } catch (Exception e) {
+                        getCommandAPI().message(c,"this is not an integer: " + a[1]);
+                    }
+                }
+                long actualLeft = left != null ? left : -1;
+                var thread = PLAYER_THREAD_MAP.get(target.getUniqueId());
+                var now = LocalDateTime.now();
+                if (thread != null) {
+                    var data = thread.data;
+                    data.getStorageItem().add(new ItemData(now,item,actualLeft));
+                } else {
+                    Bukkit.getScheduler().runTaskAsynchronously(ToxicityLibs.this,() -> {
+                        var db = ToxicityConfig.INSTANCE.getCurrentDatabase();
+                        var data = db.load(ToxicityLibs.this, target);
+                        data.getStorageItem().add(new ItemData(now,item,actualLeft));
+                        db.save(ToxicityLibs.this, target, data);
+                    });
+                }
+                getCommandAPI().message(c,"your item successfully be given.");
+            })
+            .build();
 
     @Override
     public void onEnable() {
+        setInstance(this);
         var command = getCommand("toxicity");
         if (command != null) command.setExecutor(commandAPI.createTabExecutor());
-
-        libs = load(this);
+        var storage = getCommand("storage");
+        if (storage != null) storage.setExecutor((sender, command1, label, args) -> {
+            if (sender instanceof Player player) {
+                if (args.length == 0) {
+                    var thread = PLAYER_THREAD_MAP.get(player.getUniqueId());
+                    if (thread != null) thread.data.openStorage(player);
+                } else if (sender.isOp()) {
+                    var data = Bukkit.getPlayer(args[0]);
+                    if (data == null) return true;
+                    var thread = PLAYER_THREAD_MAP.get(data.getUniqueId());
+                    if (thread != null) thread.data.openStorage(player);
+                }
+            }
+            return true;
+        });
         send("Plugin enabled.");
     }
-
     @Override
-    public void load() {
+    protected void load() {
         var config = loadYamlFile("config");
         if (config != null) {
             ConfigUtil.getAsConfig(config,"database").ifPresent(db -> {
@@ -88,11 +133,20 @@ public final class ToxicityLibs extends ToxicityPlugin {
                     var find = DatabaseSupplier.valueOf(using.toUpperCase());
                     var cfg = ConfigUtil.getAsConfig(db,using.toLowerCase()).orElse(new MemoryConfiguration());
                     var supply = find.supply(cfg);
-                    if (supply != null) LibsConfig.INSTANCE.setCurrentDatabase(supply);
+                    if (supply != null) ToxicityConfig.INSTANCE.setCurrentDatabase(supply);
                 } catch (Exception e) {
                     warn("unable to find the database: " + using);
                 }
             });
+            ToxicityConfig.INSTANCE.setAutoSaveTime(config.getLong("auto-save-time"));
+            ConfigUtil.getAsString(config,"storage-name").ifPresent(s -> ToxicityConfig.INSTANCE.setStorageName(new ComponentReader(s)));
+            ConfigUtil.getAsStringList(config,"storage-item-suffix").ifPresent(s -> ToxicityConfig.INSTANCE.setStorageItemSuffix(s.stream().map(ComponentReader::new).toList()));
+            ConfigUtil.getAsConfig(config,"time-format").ifPresent(c -> ToxicityConfig.INSTANCE.setTimeFormat(new TimeFormat(
+                    ConfigUtil.getAsString(c,"day").orElse("%dd"),
+                    ConfigUtil.getAsString(c,"hour").orElse("%h"),
+                    ConfigUtil.getAsString(c,"minute").orElse("%m"),
+                    ConfigUtil.getAsString(c,"second").orElse("%ds")
+            )));
         }
     }
 
@@ -117,10 +171,11 @@ public final class ToxicityLibs extends ToxicityPlugin {
         return Objects.requireNonNull(libs);
     }
     public static void setInstance(@NotNull ToxicityPlugin plugin) {
-        libs = load(Objects.requireNonNull(plugin));
+        load(Objects.requireNonNull(plugin));
     }
 
-    private static ToxicityPlugin load(ToxicityPlugin plugin) {
+    private static void load(ToxicityPlugin plugin) {
+        libs = plugin;
         Bukkit.getPluginManager().registerEvents(new Listener() {
             @EventHandler
             public void join(PlayerJoinEvent event) {
@@ -139,11 +194,16 @@ public final class ToxicityLibs extends ToxicityPlugin {
             public void disable(PluginDisableEvent event) {
                 if (event.getPlugin().getName().equals(plugin.getName())) {
                     PLAYER_THREAD_MAP.values().forEach(PlayerThread::save);
+                    plugin.getItemManager().end(plugin);
+                    plugin.getGuiManager().end(plugin);
                 }
             }
         },plugin);
-        plugin.load();
-        return plugin;
+        ToxicityConfig.INSTANCE.setStorageName(new ComponentReader("Storage"));
+        ToxicityConfig.INSTANCE.setInventorySmallMessage(new ComponentReader("<color:red>your inventory space is too small to get this item!"));
+        plugin.getItemManager().start(plugin);
+        plugin.getGuiManager().start(plugin);
+        plugin.reload();
     }
 
     private static class PlayerThread {
@@ -154,19 +214,19 @@ public final class ToxicityLibs extends ToxicityPlugin {
         private PlayerThread(JavaPlugin plugin, Player player) {
             this.plugin = plugin;
             this.player = player;
-            this.data = LibsConfig.INSTANCE.getCurrentDatabase().load(plugin,player);
+            this.data = ToxicityConfig.INSTANCE.getCurrentDatabase().load(plugin,player);
 
-            var time = LibsConfig.INSTANCE.getAutoSaveTime();
+            var time = ToxicityConfig.INSTANCE.getAutoSaveTime();
             task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,this::save,time,time);
             check = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,this::removeIf,20,20);
         }
         private synchronized void removeIf() {
             var now = LocalDateTime.now();
-            data.getStorageItem().removeIf(i -> ChronoUnit.SECONDS.between(i.time(),now) > i.leftTime());
+            data.getStorageItem().removeIf(i -> i.leftTime() > 0 && ChronoUnit.SECONDS.between(i.time(),now) > i.leftTime());
         }
 
         private void save() {
-            LibsConfig.INSTANCE.getCurrentDatabase().save(plugin, player, data);
+            ToxicityConfig.INSTANCE.getCurrentDatabase().save(plugin, player, data);
         }
         private void cancel() {
             task.cancel();

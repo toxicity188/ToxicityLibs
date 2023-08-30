@@ -1,8 +1,8 @@
-package kor.toxicity.toxicitylibs.util.data;
+package kor.toxicity.toxicitylibs.plugin.util.data;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import kor.toxicity.toxicitylibs.util.GsonUtil;
+import kor.toxicity.toxicitylibs.plugin.util.GsonUtil;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 

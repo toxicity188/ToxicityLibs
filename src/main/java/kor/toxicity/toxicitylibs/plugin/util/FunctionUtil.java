@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.util;
+package kor.toxicity.toxicitylibs.plugin.util;
 
 import java.util.function.BiConsumer;
 

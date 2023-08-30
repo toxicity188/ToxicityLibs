@@ -1,6 +1,6 @@
 package kor.toxicity.toxicitylibs.api;
 
-import kor.toxicity.toxicitylibs.ToxicityLibs;
+import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -17,7 +17,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public class ComponentReader {
-
     private static final Pattern DECORATION_PATTERN = Pattern.compile("<((?<name>([a-zA-Z]+)):(?<value>(\\w|,|_|-|#|:)+))>");
     private static final Map<String, BiConsumer<ComponentData, String>> FUNCTION_MAP = new HashMap<>();
     private static final Map<TextDecoration, TextDecoration.State> DECORATION_STATE_MAP = new EnumMap<>(TextDecoration.class);
@@ -125,11 +124,15 @@ public class ComponentReader {
         return result;
     }
     public @NotNull Component buildPlaceholders(Player player) {
-        var comp = Component.empty();
-        for (Function<Player, Component> playerComponentFunction : builder) {
-            comp = comp.append(playerComponentFunction.apply(player));
+        try {
+            var comp = Component.empty();
+            for (Function<Player, Component> playerComponentFunction : builder) {
+                comp = comp.append(playerComponentFunction.apply(player));
+            }
+            return comp;
+        } catch (Throwable throwable) {
+            return result;
         }
-        return comp;
     }
 
     public ComponentReader(String original) {
@@ -151,7 +154,7 @@ public class ComponentReader {
                         var value = matcher.group("value");
                         var consumer = FUNCTION_MAP.get(name.toLowerCase());
                         if (consumer != null) consumer.accept(data,value);
-                        else ToxicityLibs.warn("");
+                        else ToxicityLibs.warn("cannot find this block: " + name);
                     }
                 }
             }

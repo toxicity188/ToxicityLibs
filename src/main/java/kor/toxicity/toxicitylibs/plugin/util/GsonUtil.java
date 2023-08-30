@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.util;
+package kor.toxicity.toxicitylibs.plugin.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

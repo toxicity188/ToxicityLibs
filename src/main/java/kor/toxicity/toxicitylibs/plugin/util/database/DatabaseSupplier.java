@@ -1,9 +1,9 @@
-package kor.toxicity.toxicitylibs.util.database;
+package kor.toxicity.toxicitylibs.plugin.util.database;
 
-import kor.toxicity.toxicitylibs.ToxicityLibs;
-import kor.toxicity.toxicitylibs.util.ConfigUtil;
-import kor.toxicity.toxicitylibs.util.FunctionUtil;
-import kor.toxicity.toxicitylibs.util.data.PlayerData;
+import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
+import kor.toxicity.toxicitylibs.plugin.util.ConfigUtil;
+import kor.toxicity.toxicitylibs.plugin.util.FunctionUtil;
+import kor.toxicity.toxicitylibs.plugin.util.data.PlayerData;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -37,13 +37,13 @@ public enum DatabaseSupplier {
                         try {
                             yaml.load(file);
                             var list = ConfigUtil.getAsStringList(yaml,"storage").orElse(null);
-                            if (list != null) return new PlayerData(list);
+                            if (list != null) return new PlayerData(player,list);
                         } catch (Exception ex) {
                             ToxicityLibs.warn("error has occurred: " + player.getName());
                         }
                     }
                     ToxicityLibs.warn("unable to read this user's data: " + player.getName());
-                    return new PlayerData(Collections.emptyList());
+                    return new PlayerData(player,Collections.emptyList());
                 }
 
                 @Override
@@ -131,7 +131,7 @@ public enum DatabaseSupplier {
                                 throw new RuntimeException(e);
                             }
                         });
-                        return new PlayerData(list);
+                        return new PlayerData(player,list);
                     }
 
                     @Override
@@ -181,9 +181,4 @@ public enum DatabaseSupplier {
     }
     ;
     public abstract @Nullable Database supply(ConfigurationSection section);
-
-    public enum QueryAction {
-        UPDATE,
-        QUERY,
-    }
 }

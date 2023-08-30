@@ -1,6 +1,6 @@
 package kor.toxicity.toxicitylibs.api.command;
 
-import kor.toxicity.toxicitylibs.util.StringUtil;
+import kor.toxicity.toxicitylibs.plugin.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;

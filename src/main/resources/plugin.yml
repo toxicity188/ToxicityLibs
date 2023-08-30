@@ -1,13 +1,20 @@
 name: ToxicityLibs
 author: toxicity
 version: '${version}'
-main: kor.toxicity.toxicitylibs.ToxicityLibs
+main: kor.toxicity.toxicitylibs.plugin.ToxicityLibs
 api-version: '1.17'
 softdepend:
   - PlaceholderAPI
+  - ItemsAdder
+  - Oraxen
 commands:
   toxicity:
     aliases:
       - tc
     description: ToxicityLibs command.
+    usage: /<command>
+  storage:
+    aliases:
+      - 보관함
+    description: ToxicityLibs storage.
     usage: /<command>

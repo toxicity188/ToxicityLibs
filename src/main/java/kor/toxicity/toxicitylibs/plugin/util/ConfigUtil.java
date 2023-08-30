@@ -1,6 +1,6 @@
-package kor.toxicity.toxicitylibs.util;
+package kor.toxicity.toxicitylibs.plugin.util;
 
-import kor.toxicity.toxicitylibs.ToxicityLibs;
+import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemFlag;
