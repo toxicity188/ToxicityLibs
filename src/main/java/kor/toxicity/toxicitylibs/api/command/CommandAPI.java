@@ -25,7 +25,7 @@ public class CommandAPI {
     private final Component prefix;
     private final Map<String,CommandModule> moduleMap = new LinkedHashMap<>();
     private Component notCommandMessage = StringUtil.colored("<color:red>try /tc help to find command.");
-    private Component unknownMessage = StringUtil.colored("<color:red>unknown command. try /tc help to find command.");
+    private Component unknownCommandMessage = StringUtil.colored("<color:red>unknown command. try /tc help to find command.");
     private Component permissionRequiredMessage = StringUtil.colored("<color:red>sorry, you have not permission to do that.");
     private Component opOnlyCommandMessage = StringUtil.colored("<color:red>sorry, this is a op only command.");
     private Component notAllowedSenderMessage = StringUtil.colored("<color:red>you are not included in allowed sender type.");
@@ -62,8 +62,33 @@ public class CommandAPI {
         return superAPI;
     }
 
-    public CommandAPI setUnknownMessage(String unknownMessage) {
-        this.unknownMessage = StringUtil.colored(unknownMessage);
+    public CommandAPI setUnknownCommandMessage(String unknownCommandMessage) {
+        this.unknownCommandMessage = StringUtil.colored(unknownCommandMessage);
+        return this;
+    }
+
+    public CommandAPI setNotAllowedSenderMessage(Component notAllowedSenderMessage) {
+        this.notAllowedSenderMessage = notAllowedSenderMessage;
+        return this;
+    }
+
+    public CommandAPI setNotCommandMessage(Component notCommandMessage) {
+        this.notCommandMessage = notCommandMessage;
+        return this;
+    }
+
+    public CommandAPI setOpOnlyCommandMessage(Component opOnlyCommandMessage) {
+        this.opOnlyCommandMessage = opOnlyCommandMessage;
+        return this;
+    }
+
+    public CommandAPI setPermissionRequiredMessage(Component permissionRequiredMessage) {
+        this.permissionRequiredMessage = permissionRequiredMessage;
+        return this;
+    }
+
+    public CommandAPI setUnknownMessage(Component unknownMessage) {
+        this.unknownCommandMessage = unknownMessage;
         return this;
     }
 
@@ -207,7 +232,7 @@ public class CommandAPI {
             return b;
         }).findFirst().orElse(null);
         if (module == null) {
-            if (message) message(sender,unknownMessage);
+            if (message) message(sender, unknownCommandMessage);
             return null;
         }
         if (module.opOnly() && !sender.isOp()) {

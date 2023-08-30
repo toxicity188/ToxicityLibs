@@ -99,7 +99,8 @@ public final class ToxicityLibs extends ToxicityPlugin {
                 }
                 getCommandAPI().message(c,"your item successfully be given.");
             })
-            .build();
+            .build()
+            ;
 
     @Override
     public void onEnable() {
