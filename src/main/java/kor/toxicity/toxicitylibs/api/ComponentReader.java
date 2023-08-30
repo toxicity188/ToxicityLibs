@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.util;
+package kor.toxicity.toxicitylibs.api;
 
 import kor.toxicity.toxicitylibs.ToxicityLibs;
 import net.kyori.adventure.key.Key;
@@ -123,9 +123,7 @@ public class ComponentReader {
         var data = new ComponentData();
         for (FormattedString formattedString : parse(original)) {
             switch (formattedString.type()) {
-                case RAW -> {
-                    comp = comp.append(data.mapper.apply(formattedString.content()));
-                }
+                case RAW -> comp = comp.append(data.mapper.apply(formattedString.content()));
                 case DECORATION -> {
                     var matcher = DECORATION_PATTERN.matcher(formattedString.content());
                     if (matcher.find()) {

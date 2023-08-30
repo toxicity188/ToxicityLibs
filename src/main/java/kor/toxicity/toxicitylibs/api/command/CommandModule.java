@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.util.command;
+package kor.toxicity.toxicitylibs.api.command;
 
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;

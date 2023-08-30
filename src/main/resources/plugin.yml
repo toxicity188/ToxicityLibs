@@ -1,4 +1,5 @@
 name: ToxicityLibs
+author: toxicity
 version: '${version}'
 main: kor.toxicity.toxicitylibs.ToxicityLibs
 api-version: '1.19'

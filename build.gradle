@@ -1,9 +1,14 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
-group = 'kor.toxicity'
-version = '1.0-SNAPSHOT'
+def pluginGroup = 'kor.toxicity'
+def pluginVersion = '1.0-SNAPSHOT'
+def pluginArtifact = 'ToxicityLibs'
+
+group = pluginGroup
+version = pluginVersion
 
 repositories {
     mavenCentral()
@@ -18,7 +23,7 @@ repositories {
 }
 
 dependencies {
-compileOnly "io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT"
 }
 
 def targetJavaVersion = 17
@@ -43,5 +48,19 @@ processResources {
     filteringCharset 'UTF-8'
     filesMatching('plugin.yml') {
         expand props
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = pluginGroup
+                artifactId = pluginArtifact
+                version = pluginVersion
+
+                artifact pluginArtifact + '-' + pluginVersion + '.jar'
+            }
+        }
     }
 }

@@ -1,12 +1,11 @@
-package kor.toxicity.customcrates.util;
+package kor.toxicity.toxicitylibs.util;
 
+import kor.toxicity.toxicitylibs.api.ComponentReader;
 import net.kyori.adventure.text.Component;
-import org.bukkit.NamespacedKey;
 
 import java.io.File;
 
 public class StringUtil {
-    private static final NamespacedKey CRATE_KEY = NamespacedKey.fromString("customcrates.crate.key");
     private StringUtil() {
         throw new RuntimeException();
     }
@@ -20,9 +19,5 @@ public class StringUtil {
 
     public record FileName(String name, String extension) {
 
-    }
-
-    public static NamespacedKey getCrateKey() {
-        return CRATE_KEY;
     }
 }

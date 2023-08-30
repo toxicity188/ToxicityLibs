@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.util.command;
+package kor.toxicity.toxicitylibs.api.command;
 
 import kor.toxicity.toxicitylibs.util.StringUtil;
 import net.kyori.adventure.text.Component;

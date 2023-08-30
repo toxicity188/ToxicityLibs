@@ -1,8 +1,6 @@
-package kor.toxicity.customcrates.util;
+package kor.toxicity.toxicitylibs.util;
 
-import dev.lone.itemsadder.api.CustomStack;
-import kor.toxicity.customcrates.CustomCrates;
-import kor.toxicity.customcrates.manager.ItemManager;
+import kor.toxicity.toxicitylibs.ToxicityLibs;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemFlag;
@@ -17,18 +15,7 @@ public class ConfigUtil {
     }
     public static Optional<ItemStack> getAsItemStack(ConfigurationSection section, String key) {
         if (section.isItemStack(key)) return Optional.ofNullable(section.getItemStack(key));
-        var str = (section.isString(key)) ? section.getString(key) : null;
-        if (str != null) return Optional.ofNullable(ItemManager.getItemStack(str));
         return getAsConfig(section,key).map(c -> {
-            var itemsadder = getAsString(c,"itemsadder").orElse(null);
-            if (itemsadder != null) {
-                try {
-                    var item = CustomStack.getInstance(itemsadder);
-                    if (item != null) return item.getItemStack();
-                } catch (Throwable throwable) {
-                    CustomCrates.warn("unable to find ItemsAdder.");
-                }
-            }
             Material material;
             try {
                 material = Material.valueOf(getAsString(c,"type").orElse("APPLE").toUpperCase());
@@ -46,7 +33,7 @@ public class ConfigUtil {
                 try {
                     meta.addItemFlags(ItemFlag.valueOf(s.toUpperCase()));
                 } catch (Exception e) {
-                    CustomCrates.warn("unable to read this flag: " + s);
+                    ToxicityLibs.warn("unable to read this flag: " + s);
                 }
             }));
 
