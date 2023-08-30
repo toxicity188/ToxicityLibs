@@ -1,5 +1,7 @@
 package kor.toxicity.toxicitylibs.plugin.util;
 
+import dev.lone.itemsadder.api.CustomStack;
+import io.th0rgal.oraxen.api.OraxenItems;
 import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,6 +18,28 @@ public class ConfigUtil {
     public static Optional<ItemStack> getAsItemStack(ConfigurationSection section, String key) {
         if (section.isItemStack(key)) return Optional.ofNullable(section.getItemStack(key));
         return getAsConfig(section,key).map(c -> {
+            var reference = ConfigUtil.getAsString(c,"reference").orElse(null);
+            if (reference != null) {
+                var k = ConfigUtil.getAsString(c,"key").orElse(null);
+                if (k != null) {
+                    try {
+                        return switch (reference.toLowerCase()) {
+                            case "itemsadder" -> {
+                                var stack = CustomStack.getInstance(k);
+                                yield stack != null ? stack.getItemStack() : null;
+                            }
+                            case "oraxen" -> {
+                                var stack = OraxenItems.getItemById(k);
+                                yield stack != null ? stack.build() : null;
+                            }
+                            default -> null;
+                        };
+                    } catch (Throwable throwable) {
+                        ToxicityLibs.warn("plugin not found: " + reference);
+                        return null;
+                    }
+                } else ToxicityLibs.warn("unable to find key: " + reference);
+            }
             Material material;
             try {
                 material = Material.valueOf(getAsString(c,"type").orElse("APPLE").toUpperCase());

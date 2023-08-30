@@ -55,7 +55,7 @@ public class PlayerData {
                     if (itemData.leftTime() > 0) {
                         var display = meta.displayName();
                         if (display == null) display = Component.text(item.getType().toString());
-                        meta.displayName(display.append(Component.empty()).append(Component.text(StringUtil.parseTimeFormat(ChronoUnit.SECONDS.between(itemData.time(),now))).color(NamedTextColor.GRAY)));
+                        meta.displayName(display.append(Component.space()).append(Component.text(StringUtil.parseTimeFormat(itemData.leftTime() - ChronoUnit.SECONDS.between(itemData.time(),now))).color(NamedTextColor.GRAY)));
                     }
                     var list = meta.lore();
                     if (list == null) list = new ArrayList<>();
@@ -81,7 +81,7 @@ public class PlayerData {
                     initialize();
                     viewer.updateInventory();
                 } else {
-                    
+                    viewer.sendMessage(ToxicityConfig.INSTANCE.getInventorySmallMessage().buildPlaceholders(viewer));
                 }
                 return true;
             }

@@ -31,9 +31,18 @@ public class StringUtil {
         var s = d2 % 60;
         var sb = new StringBuilder();
         var format = ToxicityConfig.INSTANCE.getTimeFormat();
-        sb.append(format.day().formatted(d));
-        sb.append(format.hour().formatted(h));
-        sb.append(format.minute().formatted(m));
+        if (d > 0) {
+            sb.append(format.day().formatted(d));
+        }
+        if (h > 0) {
+            if (!sb.isEmpty()) sb.append(' ');
+            sb.append(format.hour().formatted(h));
+        }
+        if (m > 0) {
+            if (!sb.isEmpty()) sb.append(' ');
+            sb.append(format.minute().formatted(m));
+        }
+        if (!sb.isEmpty()) sb.append(' ');
         sb.append(format.second().formatted(s));
         return sb.toString();
     }
