@@ -1,0 +1,4 @@
+name: ToxicityLibs
+version: '${version}'
+main: kor.toxicity.toxicitylibs.ToxicityLibs
+api-version: '1.19'
