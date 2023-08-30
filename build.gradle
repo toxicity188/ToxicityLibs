@@ -5,7 +5,6 @@ plugins {
 
 def pluginGroup = 'kor.toxicity'
 def pluginVersion = '1.0-SNAPSHOT'
-def pluginArtifact = 'ToxicityLibs'
 
 group = pluginGroup
 version = pluginVersion
@@ -54,12 +53,16 @@ processResources {
 afterEvaluate {
     publishing {
         publications {
-            maven(MavenPublication) {
-                groupId = pluginGroup
-                artifactId = pluginArtifact
-                version = pluginVersion
+            paidRelease(MavenPublication) {
 
-                artifact pluginArtifact + '-' + pluginVersion + '.jar'
+                groupId = pluginGroup
+                artifactId = 'final'
+                version = pluginVersion
+            }
+            paidDebug(MavenPublication) {
+                groupId = pluginGroup
+                artifactId = 'final-debug'
+                version = pluginVersion
             }
         }
     }
