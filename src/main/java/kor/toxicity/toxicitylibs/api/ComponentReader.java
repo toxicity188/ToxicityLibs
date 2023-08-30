@@ -1,14 +1,18 @@
 package kor.toxicity.toxicitylibs.api;
 
 import kor.toxicity.toxicitylibs.ToxicityLibs;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -16,7 +20,7 @@ public class ComponentReader {
 
     private static final Pattern DECORATION_PATTERN = Pattern.compile("<((?<name>([a-zA-Z]+)):(?<value>(\\w|,|_|-|#|:)+))>");
     private static final Map<String, BiConsumer<ComponentData, String>> FUNCTION_MAP = new HashMap<>();
-    private static final Map<TextDecoration, TextDecoration.State> DECORATION_STATE_MAP = new HashMap<>();
+    private static final Map<TextDecoration, TextDecoration.State> DECORATION_STATE_MAP = new EnumMap<>(TextDecoration.class);
 
     static {
         DECORATION_STATE_MAP.put(TextDecoration.BOLD, TextDecoration.State.FALSE);
@@ -45,9 +49,8 @@ public class ComponentReader {
 
 
         FUNCTION_MAP.put("color", (b,s) -> {
-            b.mapper = str -> Component.text(str).font(b.font).color(b.color).decorations(b.decoration);
-            b.decoration.clear();
-            b.decoration.putAll(DECORATION_STATE_MAP);
+            b.mapper = null;
+            b.decoration = DECORATION_STATE_MAP;
             if (s.equals("null")) {
                 b.color = null;
                 return;
@@ -70,15 +73,18 @@ public class ComponentReader {
             }
         });
         FUNCTION_MAP.put("decoration", (b,s) -> {
+            Map<TextDecoration, TextDecoration.State> decorationStateMap = new EnumMap<>(DECORATION_STATE_MAP);
             for (String string : s.split(",")) {
                 try {
-                    b.decoration.put(TextDecoration.valueOf(string.toUpperCase()), TextDecoration.State.TRUE);
+                    decorationStateMap.put(TextDecoration.valueOf(string.toUpperCase()), TextDecoration.State.TRUE);
                 } catch (Exception e) {
                     ToxicityLibs.warn("unable to find the decoration: " + string);
                 }
             }
+            b.decoration = decorationStateMap;
         });
         FUNCTION_MAP.put("gradient", (b,s) -> {
+            b.decoration = DECORATION_STATE_MAP;
             var split = s.split("-");
             if (split.length == 2) {
                 var color = Arrays.stream(split).map(c -> (c.startsWith("#") && c.length() == 7) ? TextColor.fromHexString(c) : colorMap.get(c.toUpperCase())).filter(Objects::nonNull).toList();
@@ -94,7 +100,7 @@ public class ComponentReader {
                     var g2 = (double) color2.green() - g1;
                     var b2 = (double) color2.blue() - b1;
 
-                    b.mapper = str -> {
+                    b.mapper = (str,data) -> {
                         var comp = Component.empty();
                         var d = 1D / (double) str.length();
                         var i = 0D;
@@ -103,7 +109,7 @@ public class ComponentReader {
                                     (int) (r1 + r2 * d * i),
                                     (int) (g1 + g2 * d * i),
                                     (int) (b1 + b2 * d * i)
-                            )).font(b.font).decorations(b.decoration));
+                            )).font(data.font).decorations(data.decoration));
                             i++;
                         }
                         return comp;
@@ -113,9 +119,17 @@ public class ComponentReader {
         });
     }
     private final Component result;
+    private final List<Function<Player,Component>> builder = new ArrayList<>();
 
-    public Component getResult() {
+    public @NotNull Component getResult() {
         return result;
+    }
+    public @NotNull Component buildPlaceholders(Player player) {
+        var comp = Component.empty();
+        for (Function<Player, Component> playerComponentFunction : builder) {
+            comp = comp.append(playerComponentFunction.apply(player));
+        }
+        return comp;
     }
 
     public ComponentReader(String original) {
@@ -123,7 +137,13 @@ public class ComponentReader {
         var data = new ComponentData();
         for (FormattedString formattedString : parse(original)) {
             switch (formattedString.type()) {
-                case RAW -> comp = comp.append(data.mapper.apply(formattedString.content()));
+                case RAW -> {
+                    var c = data.copy();
+                    var content = formattedString.content();
+                    Function<String,Component> mapper = (c.mapper != null) ? str -> c.mapper.apply(str,c) : str -> Component.text(str).font(c.font).decorations(c.decoration).color(c.color);
+                    comp = comp.append(mapper.apply(content));
+                    builder.add(p -> mapper.apply(PlaceholderAPI.setPlaceholders(p,content)));
+                }
                 case DECORATION -> {
                     var matcher = DECORATION_PATTERN.matcher(formattedString.content());
                     if (matcher.find()) {
@@ -141,9 +161,19 @@ public class ComponentReader {
     private static class ComponentData {
         private Key font = null;
         private TextColor color = NamedTextColor.WHITE;
-        private final Map<TextDecoration,TextDecoration.State> decoration = new HashMap<>(DECORATION_STATE_MAP);
-        private Function<String,Component> mapper = s -> Component.text(s).font(font).color(color).decorations(decoration);
+        private Map<TextDecoration,TextDecoration.State> decoration = DECORATION_STATE_MAP;
+        private BiFunction<String,ComponentData,Component> mapper = null;
+
+        private ComponentData copy() {
+            var data = new ComponentData();
+            data.font = font;
+            data.color = color;
+            data.decoration = decoration;
+            data.mapper = mapper;
+            return data;
+        }
     }
+
     public static List<FormattedString> parse(String target) {
         var array = new ArrayList<FormattedString>();
         var builder = new StringBuilder();

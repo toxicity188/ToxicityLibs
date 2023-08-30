@@ -24,8 +24,8 @@ public class CommandAPI {
 
     private final Component prefix;
     private final Map<String,CommandModule> moduleMap = new LinkedHashMap<>();
-    private Component notCommandMessage = StringUtil.colored("<color:red>try /cc help to find command.");
-    private Component unknownMessage = StringUtil.colored("<color:red>unknown command. try /cc help to find command.");
+    private Component notCommandMessage = StringUtil.colored("<color:red>try /tc help to find command.");
+    private Component unknownMessage = StringUtil.colored("<color:red>unknown command. try /tc help to find command.");
     private Component permissionRequiredMessage = StringUtil.colored("<color:red>sorry, you have not permission to do that.");
     private Component opOnlyCommandMessage = StringUtil.colored("<color:red>sorry, this is a op only command.");
     private Component notAllowedSenderMessage = StringUtil.colored("<color:red>you are not included in allowed sender type.");

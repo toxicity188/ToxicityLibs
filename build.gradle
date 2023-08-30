@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'maven-publish'
 }
 
@@ -19,10 +20,15 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    maven {
+        url = "https://jitpack.io"
+    }
 }
 
 dependencies {
     compileOnly "io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT"
+    compileOnly(group: "com.github.PlaceholderAPI", name: "PlaceholderAPI", version: "master-SNAPSHOT")
+    implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
 }
 
 def targetJavaVersion = 17
@@ -40,6 +46,9 @@ tasks.withType(JavaCompile).configureEach {
         options.release = targetJavaVersion
     }
 }
+jar {
+    finalizedBy shadowJar
+}
 
 processResources {
     def props = [version: version]
@@ -53,16 +62,8 @@ processResources {
 afterEvaluate {
     publishing {
         publications {
-            paidRelease(MavenPublication) {
-
-                groupId = pluginGroup
-                artifactId = 'final'
-                version = pluginVersion
-            }
-            paidDebug(MavenPublication) {
-                groupId = pluginGroup
-                artifactId = 'final-debug'
-                version = pluginVersion
+            shadow(MavenPublication) { publication ->
+                project.shadow.component(publication)
             }
         }
     }

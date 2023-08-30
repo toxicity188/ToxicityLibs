@@ -1,0 +1,9 @@
+database:
+  #yml, mysql
+  using: yml
+
+  mysql:
+    host: localhost
+    database: toxicitylibs
+    name: root
+    password: write your password here!

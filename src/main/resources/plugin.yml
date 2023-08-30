@@ -2,4 +2,12 @@ name: ToxicityLibs
 author: toxicity
 version: '${version}'
 main: kor.toxicity.toxicitylibs.ToxicityLibs
-api-version: '1.19'
+api-version: '1.17'
+softdepend:
+  - PlaceholderAPI
+commands:
+  toxicity:
+    aliases:
+      - tc
+    description: ToxicityLibs command.
+    usage: /<command>
