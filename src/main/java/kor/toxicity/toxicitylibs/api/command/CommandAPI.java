@@ -250,7 +250,7 @@ public class CommandAPI {
             if (message) message(sender,opOnlyCommandMessage);
             return null;
         }
-        var permission = false;
+        var permission = module.permission().length == 0;
         for (String s : module.permission()) {
             if (sender.hasPermission(s)) {
                 permission = true;
@@ -261,7 +261,7 @@ public class CommandAPI {
             if (message) message(sender,permissionRequiredMessage);
             return null;
         }
-        var allowed = false;
+        var allowed = module.allowedSender().length == 0;
         for (SenderType senderType : module.allowedSender()) {
             if (senderType.match(sender.getClass())) {
                 allowed = true;

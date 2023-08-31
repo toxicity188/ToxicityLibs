@@ -118,6 +118,7 @@ public class ComponentReader {
         });
     }
     private final Component result;
+    private final String originalText;
     private final List<Function<Player,Component>> builder = new ArrayList<>();
 
     public @NotNull Component getResult() {
@@ -159,8 +160,14 @@ public class ComponentReader {
                 }
             }
         }
+        originalText = original;
         result = comp;
     }
+
+    public String getOriginalText() {
+        return originalText;
+    }
+
     private static class ComponentData {
         private Key font = null;
         private TextColor color = NamedTextColor.WHITE;
