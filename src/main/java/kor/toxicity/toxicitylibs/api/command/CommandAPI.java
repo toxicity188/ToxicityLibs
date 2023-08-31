@@ -45,17 +45,21 @@ public class CommandAPI {
     public CommandAPI(Component prefix) {
         this(prefix,null);
     }
+
+    private final CommandAPIBuilder helpBuilder;
     public CommandAPI(Component prefix, CommandAPI superAPI) {
         this.prefix = prefix;
         this.superAPI = superAPI;
-        create("help")
+        helpBuilder = create("help")
                 .setAliases(new String[] {"h"})
                 .setDescription("show all sub-command in this command.")
                 .setUsage("help")
-                .setPermission(new String[] {"customcrates.help"})
                 .setExecutor((c,a) -> moduleMap.forEach((k, v) -> message(c, "/" + commandPrefix + " " + v.usage() + " - " + v.description())))
-                .build()
                 ;
+    }
+
+    public CommandAPIBuilder getHelpBuilder() {
+        return helpBuilder;
     }
 
     public CommandAPI getSuperAPI() {
@@ -87,7 +91,7 @@ public class CommandAPI {
         return this;
     }
 
-    public CommandAPI setUnknownMessage(Component unknownMessage) {
+    public CommandAPI setUnknownCommandMessage(Component unknownMessage) {
         this.unknownCommandMessage = unknownMessage;
         return this;
     }
@@ -117,6 +121,13 @@ public class CommandAPI {
     }
     public CommandAPI createSubBranches(String name, String[] aliases, String description, String[] permission, SenderType[] allowedSender, boolean opOnly) {
         var api = new CommandAPI(prefix,this);
+        api.commandPrefix = commandPrefix;
+
+        api.notCommandMessage = notCommandMessage;
+        api.unknownCommandMessage = unknownCommandMessage;
+        api.notAllowedSenderMessage = notAllowedSenderMessage;
+        api.permissionRequiredMessage = permissionRequiredMessage;
+        api.opOnlyCommandMessage = opOnlyCommandMessage;
         moduleMap.put(name, new CommandModule() {
             @Override
             public String[] aliases() {
@@ -156,13 +167,13 @@ public class CommandAPI {
             @Override
             public void execute(CommandSender sender, String[] args) {
                 if (args.length == 0) {
-                    message(sender,notCommandMessage);
+                    api.message(sender,api.notCommandMessage);
                 } else {
                     var module = api.getModule(sender, args[0], true);
                     if (module != null) {
                         var r = removeFirst(args);
                         if (r.length < module.length()) {
-                            message(sender, Component.text("usage: " + module.usage()));
+                            api.message(sender, Component.text("usage: " + module.usage()));
                         } else module.execute(sender, r);
                     }
                 }
