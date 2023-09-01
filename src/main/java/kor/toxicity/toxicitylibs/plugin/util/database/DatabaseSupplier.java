@@ -3,7 +3,7 @@ package kor.toxicity.toxicitylibs.plugin.util.database;
 import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import kor.toxicity.toxicitylibs.plugin.util.ConfigUtil;
 import kor.toxicity.toxicitylibs.plugin.util.FunctionUtil;
-import kor.toxicity.toxicitylibs.plugin.util.data.PlayerData;
+import kor.toxicity.toxicitylibs.api.data.PlayerData;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;

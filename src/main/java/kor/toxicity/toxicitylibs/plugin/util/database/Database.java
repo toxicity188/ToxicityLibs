@@ -1,6 +1,6 @@
 package kor.toxicity.toxicitylibs.plugin.util.database;
 
-import kor.toxicity.toxicitylibs.plugin.util.data.PlayerData;
+import kor.toxicity.toxicitylibs.api.data.PlayerData;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;

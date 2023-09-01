@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.plugin.util.data;
+package kor.toxicity.toxicitylibs.api.data;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

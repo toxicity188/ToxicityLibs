@@ -8,10 +8,11 @@ import kor.toxicity.toxicitylibs.api.command.SenderType;
 import kor.toxicity.toxicitylibs.api.util.TimeFormat;
 import kor.toxicity.toxicitylibs.plugin.util.ConfigUtil;
 import kor.toxicity.toxicitylibs.plugin.util.StringUtil;
-import kor.toxicity.toxicitylibs.plugin.util.data.ItemData;
-import kor.toxicity.toxicitylibs.plugin.util.data.PlayerData;
+import kor.toxicity.toxicitylibs.api.data.ItemData;
+import kor.toxicity.toxicitylibs.api.data.PlayerData;
 import kor.toxicity.toxicitylibs.plugin.util.database.DatabaseSupplier;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,6 +23,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public final class ToxicityLibs extends ToxicityPlugin {
     private static ToxicityPlugin libs;
@@ -233,5 +236,21 @@ public final class ToxicityLibs extends ToxicityPlugin {
             task.cancel();
             check.cancel();
         }
+    }
+
+    public static @Nullable PlayerData getPlayerData(@NotNull Player player) {
+        var thread = PLAYER_THREAD_MAP.get(player.getUniqueId());
+        return thread != null ? thread.data : null;
+    }
+    public static void getPlayerData(@NotNull OfflinePlayer player, @NotNull Consumer<PlayerData> dataConsumer) {
+        Bukkit.getScheduler().runTaskAsynchronously(libs,() -> {
+           var thread = PLAYER_THREAD_MAP.get(player.getUniqueId());
+           if (thread != null) dataConsumer.accept(thread.data);
+           else {
+               var data = ToxicityConfig.INSTANCE.getCurrentDatabase().load(libs, player);
+               dataConsumer.accept(data);
+               ToxicityConfig.INSTANCE.getCurrentDatabase().save(libs, player, data);
+           }
+        });
     }
 }

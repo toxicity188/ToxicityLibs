@@ -1,4 +1,4 @@
-package kor.toxicity.toxicitylibs.plugin.util.data;
+package kor.toxicity.toxicitylibs.api.data;
 
 import kor.toxicity.toxicitylibs.api.ToxicityConfig;
 import kor.toxicity.toxicitylibs.api.gui.GuiExecutor;
