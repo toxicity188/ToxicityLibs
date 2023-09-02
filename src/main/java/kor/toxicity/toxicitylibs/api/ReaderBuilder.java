@@ -26,7 +26,7 @@ public class ReaderBuilder {
         ComponentReader<T> build();
     }
     public interface VariableBuilder<T> extends Builder<T> {
-        void register(String pattern, Function<T,String> function);
+        VariableBuilder<T> register(String pattern, Function<T,String> function);
     }
 
     private record SimpleReaderBuilder<T>(String s) implements Builder<T> {
@@ -63,11 +63,12 @@ public class ReaderBuilder {
         }
 
         @Override
-        public void register(String pattern, Function<T, String> function) {
+        public VariableBuilder<T> register(String pattern, Function<T, String> function) {
             try {
                 pairs.add(new Pair(Pattern.compile(pattern, Pattern.UNICODE_CHARACTER_CLASS), function));
             } catch (Exception ignored) {
             }
+            return this;
         }
 
         private class Pair {
