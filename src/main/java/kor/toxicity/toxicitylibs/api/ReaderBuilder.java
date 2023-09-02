@@ -12,8 +12,8 @@ public class ReaderBuilder {
     private ReaderBuilder() {
         throw new RuntimeException();
     }
-    public static <T> Builder<T> simple(String s) {
-        return new SimpleReaderBuilder<>(s);
+    public static Builder<Object> simple(String s) {
+        return new SimpleReaderBuilder(s);
     }
     public static Builder<Player> placeholder(String s) {
         return new PlaceholderReaderBuilder(s);
@@ -29,10 +29,10 @@ public class ReaderBuilder {
         VariableBuilder<T> register(String pattern, Function<T,String> function);
     }
 
-    private record SimpleReaderBuilder<T>(String s) implements Builder<T> {
+    private record SimpleReaderBuilder(String s) implements Builder<Object> {
 
         @Override
-        public ComponentReader<T> build() {
+        public ComponentReader<Object> build() {
             return new ComponentReader<>(s, (a, b) -> b);
         }
     }
