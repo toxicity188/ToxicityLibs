@@ -1,17 +1,20 @@
 package kor.toxicity.toxicitylibs.plugin.util;
 
-import kor.toxicity.toxicitylibs.api.ComponentReader;
+import kor.toxicity.toxicitylibs.api.FormatType;
+import kor.toxicity.toxicitylibs.api.ReaderBuilder;
 import kor.toxicity.toxicitylibs.api.ToxicityConfig;
 import net.kyori.adventure.text.Component;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StringUtil {
     private StringUtil() {
         throw new RuntimeException();
     }
     public static Component colored(String target) {
-        return new ComponentReader(target).getResult();
+        return ReaderBuilder.simple(target).build().getResult();
     }
     public static FileName getFileName(File file) {
         var name = file.getName().split("\\.");
@@ -45,5 +48,36 @@ public class StringUtil {
         if (!sb.isEmpty()) sb.append(' ');
         sb.append(format.second().formatted(s));
         return sb.toString();
+    }
+
+    public static List<FormattedString> readerParse(String target) {
+        var array = new ArrayList<FormattedString>();
+        var builder = new StringBuilder();
+        var cont = false;
+        for (char c : target.toCharArray()) {
+            if (cont) {
+                builder.append(c);
+                cont = false;
+                continue;
+            }
+            if (c == '\\') {
+                cont = true;
+                continue;
+            }
+            if (c == '<') {
+                array.add(new FormattedString(builder.toString(), FormatType.RAW));
+                builder.setLength(0);
+            }
+            builder.append(c);
+            if (c == '>') {
+                array.add(new FormattedString(builder.toString(),FormatType.DECORATION));
+                builder.setLength(0);
+            }
+        }
+        array.add(new FormattedString(builder.toString(),FormatType.RAW));
+        return array;
+    }
+    public record FormattedString(String content, FormatType type) {
+
     }
 }

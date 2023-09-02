@@ -3,6 +3,7 @@ package kor.toxicity.toxicitylibs.api;
 import kor.toxicity.toxicitylibs.api.util.TimeFormat;
 import kor.toxicity.toxicitylibs.plugin.util.database.Database;
 import kor.toxicity.toxicitylibs.plugin.util.database.DatabaseSupplier;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -14,9 +15,9 @@ public enum ToxicityConfig {
     ;
     private long autoSaveTime = 6000L;
     private Database currentDatabase = DatabaseSupplier.YML.supply(null);
-    private ComponentReader storageName;
-    private ComponentReader inventorySmallMessage;
-    private List<ComponentReader> storageItemSuffix = Collections.emptyList();
+    private ComponentReader<Player> storageName;
+    private ComponentReader<Player> inventorySmallMessage;
+    private List<ComponentReader<Player>> storageItemSuffix = Collections.emptyList();
     private TimeFormat timeFormat = new TimeFormat("%dd","%dh","%dm","%ds");
 
     public void setCurrentDatabase(@NotNull Database currentDatabase) {
@@ -24,11 +25,11 @@ public enum ToxicityConfig {
         this.currentDatabase = Objects.requireNonNull(currentDatabase);
     }
 
-    public @NotNull ComponentReader getStorageName() {
+    public @NotNull ComponentReader<Player> getStorageName() {
         return storageName;
     }
 
-    public void setStorageName(@NotNull ComponentReader storageName) {
+    public void setStorageName(@NotNull ComponentReader<Player> storageName) {
         this.storageName = Objects.requireNonNull(storageName);
     }
 
@@ -36,11 +37,11 @@ public enum ToxicityConfig {
         this.autoSaveTime = Math.max(autoSaveTime,1) * 20;
     }
 
-    public @NotNull List<ComponentReader> getStorageItemSuffix() {
+    public @NotNull List<ComponentReader<Player>> getStorageItemSuffix() {
         return storageItemSuffix;
     }
 
-    public void setStorageItemSuffix(@NotNull List<ComponentReader> storageItemSuffix) {
+    public void setStorageItemSuffix(List<ComponentReader<Player>> storageItemSuffix) {
         this.storageItemSuffix = Objects.requireNonNull(storageItemSuffix);
     }
 
@@ -60,11 +61,11 @@ public enum ToxicityConfig {
         this.timeFormat = Objects.requireNonNull(format);
     }
 
-    public @NotNull ComponentReader getInventorySmallMessage() {
+    public @NotNull ComponentReader<Player> getInventorySmallMessage() {
         return inventorySmallMessage;
     }
 
-    public void setInventorySmallMessage(@NotNull ComponentReader inventorySmallMessage) {
+    public void setInventorySmallMessage(@NotNull ComponentReader<Player> inventorySmallMessage) {
         this.inventorySmallMessage = Objects.requireNonNull(inventorySmallMessage);
     }
 }

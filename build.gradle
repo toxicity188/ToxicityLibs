@@ -5,7 +5,7 @@ plugins {
 }
 
 def pluginGroup = 'kor.toxicity'
-def pluginVersion = '1.0-SNAPSHOT'
+def pluginVersion = '1.0.1-SNAPSHOT'
 
 group = pluginGroup
 version = pluginVersion

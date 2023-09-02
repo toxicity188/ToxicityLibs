@@ -1,13 +1,12 @@
 package kor.toxicity.toxicitylibs.api;
 
 import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
-import me.clip.placeholderapi.PlaceholderAPI;
+import kor.toxicity.toxicitylibs.plugin.util.StringUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -16,7 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-public class ComponentReader {
+public class ComponentReader<T> {
     private static final Pattern DECORATION_PATTERN = Pattern.compile("<((?<name>([a-zA-Z]+)):(?<value>(\\w|,|_|-|#|:)+))>");
     private static final Map<String, BiConsumer<ComponentData, String>> FUNCTION_MAP = new HashMap<>();
     private static final Map<TextDecoration, TextDecoration.State> DECORATION_STATE_MAP = new EnumMap<>(TextDecoration.class);
@@ -119,16 +118,16 @@ public class ComponentReader {
     }
     private final Component result;
     private final String originalText;
-    private final List<Function<Player,Component>> builder = new ArrayList<>();
+    private final List<Function<T,Component>> builder = new ArrayList<>();
 
     public @NotNull Component getResult() {
         return result;
     }
-    public @NotNull Component buildPlaceholders(Player player) {
+    public @NotNull Component getResult(T t) {
         try {
             var comp = Component.empty();
-            for (Function<Player, Component> playerComponentFunction : builder) {
-                comp = comp.append(playerComponentFunction.apply(player));
+            for (Function<T, Component> playerComponentFunction : builder) {
+                comp = comp.append(playerComponentFunction.apply(t));
             }
             return comp;
         } catch (Throwable throwable) {
@@ -136,17 +135,17 @@ public class ComponentReader {
         }
     }
 
-    public ComponentReader(String original) {
+    public ComponentReader(String original, BiFunction<T, String ,String> apply) {
         var comp = Component.empty();
         var data = new ComponentData();
-        for (FormattedString formattedString : parse(original)) {
+        for (StringUtil.FormattedString formattedString : StringUtil.readerParse(original)) {
             switch (formattedString.type()) {
                 case RAW -> {
                     var c = data.copy();
                     var content = formattedString.content();
                     Function<String,Component> mapper = (c.mapper != null) ? str -> c.mapper.apply(str,c) : str -> Component.text(str).font(c.font).decorations(c.decoration).color(c.color);
                     comp = comp.append(mapper.apply(content));
-                    builder.add(p -> mapper.apply(PlaceholderAPI.setPlaceholders(p,content)));
+                    builder.add(p -> mapper.apply(apply.apply(p,content)));
                 }
                 case DECORATION -> {
                     var matcher = DECORATION_PATTERN.matcher(formattedString.content());
@@ -184,38 +183,4 @@ public class ComponentReader {
         }
     }
 
-    public static List<FormattedString> parse(String target) {
-        var array = new ArrayList<FormattedString>();
-        var builder = new StringBuilder();
-        var cont = false;
-        for (char c : target.toCharArray()) {
-            if (cont) {
-                builder.append(c);
-                cont = false;
-                continue;
-            }
-            if (c == '\\') {
-                cont = true;
-                continue;
-            }
-            if (c == '<') {
-                array.add(new FormattedString(builder.toString(),FormatType.RAW));
-                builder.setLength(0);
-            }
-            builder.append(c);
-            if (c == '>') {
-                array.add(new FormattedString(builder.toString(),FormatType.DECORATION));
-                builder.setLength(0);
-            }
-        }
-        array.add(new FormattedString(builder.toString(),FormatType.RAW));
-        return array;
-    }
-    public record FormattedString(String content, FormatType type) {
-
-    }
-    public enum FormatType {
-        RAW,
-        DECORATION
-    }
 }

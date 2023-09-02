@@ -40,7 +40,7 @@ public class PlayerData {
 
     public void openStorage(Player viewer) {
         var storageName = ToxicityConfig.INSTANCE.getStorageName();
-        ToxicityLibs.getInstance().getGuiManager().openGui(viewer, new GuiExecutor(54,player instanceof Player online ? storageName.buildPlaceholders(online) : storageName.getResult()) {
+        ToxicityLibs.getInstance().getGuiManager().openGui(viewer, new GuiExecutor(54,player instanceof Player online ? storageName.getResult(online) : storageName.getResult()) {
             @Override
             public void initialize() {
                 var inv = getInventory();
@@ -59,7 +59,7 @@ public class PlayerData {
                     }
                     var list = meta.lore();
                     if (list == null) list = new ArrayList<>();
-                    list.addAll(ToxicityConfig.INSTANCE.getStorageItemSuffix().stream().map(s -> player instanceof Player online ? s.buildPlaceholders(online) : s.getResult()).toList());
+                    list.addAll(ToxicityConfig.INSTANCE.getStorageItemSuffix().stream().map(s -> player instanceof Player online ? s.getResult(online) : s.getResult()).toList());
 
                     item.setItemMeta(meta);
 
@@ -81,7 +81,7 @@ public class PlayerData {
                     initialize();
                     viewer.updateInventory();
                 } else {
-                    viewer.sendMessage(ToxicityConfig.INSTANCE.getInventorySmallMessage().buildPlaceholders(viewer));
+                    viewer.sendMessage(ToxicityConfig.INSTANCE.getInventorySmallMessage().getResult(viewer));
                 }
                 return true;
             }

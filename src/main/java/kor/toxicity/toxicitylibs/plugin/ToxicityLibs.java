@@ -1,6 +1,6 @@
 package kor.toxicity.toxicitylibs.plugin;
 
-import kor.toxicity.toxicitylibs.api.ComponentReader;
+import kor.toxicity.toxicitylibs.api.ReaderBuilder;
 import kor.toxicity.toxicitylibs.api.ToxicityConfig;
 import kor.toxicity.toxicitylibs.api.ToxicityPlugin;
 import kor.toxicity.toxicitylibs.api.command.CommandAPI;
@@ -65,7 +65,7 @@ public final class ToxicityLibs extends ToxicityPlugin {
             .setPermission(new String[] {"toxicitylibs.placeholder"})
             .setLength(1)
             .setAllowedSender(new SenderType[] {SenderType.PLAYER})
-            .setExecutor((c,a) -> c.sendMessage(new ComponentReader(String.join(" ",a)).buildPlaceholders((Player) c)))
+            .setExecutor((c,a) -> c.sendMessage(ReaderBuilder.placeholder(String.join(" ",a)).build().getResult((Player) c)))
             .build()
             //give
             .create("give")
@@ -143,8 +143,8 @@ public final class ToxicityLibs extends ToxicityPlugin {
                 }
             });
             ToxicityConfig.INSTANCE.setAutoSaveTime(config.getLong("auto-save-time"));
-            ConfigUtil.getAsString(config,"storage-name").ifPresent(s -> ToxicityConfig.INSTANCE.setStorageName(new ComponentReader(s)));
-            ConfigUtil.getAsStringList(config,"storage-item-suffix").ifPresent(s -> ToxicityConfig.INSTANCE.setStorageItemSuffix(s.stream().map(ComponentReader::new).toList()));
+            ConfigUtil.getAsString(config,"storage-name").ifPresent(s -> ToxicityConfig.INSTANCE.setStorageName(ReaderBuilder.placeholder(s).build()));
+            ConfigUtil.getAsStringList(config,"storage-item-suffix").ifPresent(s -> ToxicityConfig.INSTANCE.setStorageItemSuffix(s.stream().map(f -> ReaderBuilder.placeholder(f).build()).toList()));
             ConfigUtil.getAsConfig(config,"time-format").ifPresent(c -> ToxicityConfig.INSTANCE.setTimeFormat(new TimeFormat(
                     ConfigUtil.getAsString(c,"day").orElse("%dd"),
                     ConfigUtil.getAsString(c,"hour").orElse("%h"),
@@ -203,8 +203,8 @@ public final class ToxicityLibs extends ToxicityPlugin {
                 }
             }
         },plugin);
-        ToxicityConfig.INSTANCE.setStorageName(new ComponentReader("Storage"));
-        ToxicityConfig.INSTANCE.setInventorySmallMessage(new ComponentReader("<color:red>your inventory space is too small to get this item!"));
+        ToxicityConfig.INSTANCE.setStorageName(ReaderBuilder.placeholder("Storage").build());
+        ToxicityConfig.INSTANCE.setInventorySmallMessage(ReaderBuilder.placeholder("<color:red>your inventory space is too small to get this item!").build());
         plugin.getItemManager().start(plugin);
         plugin.getGuiManager().start(plugin);
         plugin.reload();
