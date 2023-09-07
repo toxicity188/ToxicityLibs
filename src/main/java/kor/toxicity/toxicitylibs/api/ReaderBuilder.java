@@ -1,5 +1,6 @@
 package kor.toxicity.toxicitylibs.api;
 
+import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.entity.Player;
 
@@ -65,8 +66,9 @@ public class ReaderBuilder {
         @Override
         public VariableBuilder<T> register(String pattern, Function<T, String> function) {
             try {
-                pairs.add(new Pair(Pattern.compile(pattern, Pattern.UNICODE_CHARACTER_CLASS), function));
-            } catch (Exception ignored) {
+                pairs.add(new Pair(Pattern.compile(pattern), function));
+            } catch (Exception ex) {
+                ToxicityLibs.warn("unable to read this pattern: " + pattern);
             }
             return this;
         }
