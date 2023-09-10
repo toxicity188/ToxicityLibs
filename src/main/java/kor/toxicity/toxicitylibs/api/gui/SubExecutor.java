@@ -1,11 +1,9 @@
 package kor.toxicity.toxicitylibs.api.gui;
 
-import org.bukkit.inventory.Inventory;
-
 import java.util.Objects;
 
 public abstract class SubExecutor extends GuiExecutor {
-    private boolean safeEnd;
+    private boolean safeEnd = false;
 
     public boolean isSafeEnd() {
         return safeEnd;
@@ -15,7 +13,7 @@ public abstract class SubExecutor extends GuiExecutor {
         this.safeEnd = safeEnd;
     }
 
-    public SubExecutor(Inventory inventory, GuiExecutor parent) {
+    public SubExecutor(GuiHolder inventory, GuiExecutor parent) {
         super(inventory, Objects.requireNonNull(parent));
     }
 }

@@ -1,10 +1,7 @@
 package kor.toxicity.toxicitylibs.plugin.util.manager;
 
 import kor.toxicity.toxicitylibs.api.ToxicityPlugin;
-import kor.toxicity.toxicitylibs.api.gui.GuiExecutor;
-import kor.toxicity.toxicitylibs.api.gui.GuiType;
-import kor.toxicity.toxicitylibs.api.gui.MouseButton;
-import kor.toxicity.toxicitylibs.api.gui.SubExecutor;
+import kor.toxicity.toxicitylibs.api.gui.*;
 import kor.toxicity.toxicitylibs.api.manager.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -25,11 +22,11 @@ public class GuiManagerImpl implements GuiManager {
     }
     @Override
     public void openGui(Player player, GuiExecutor executor, GuiType type) {
-        var exec = getExecutor(player);
-        if (executor instanceof SubExecutor subExecutor) subExecutor.setSafeEnd(true);
-        var select = exec != null ? type.build(exec,executor) : executor;
+        var holder = getHolder(player);
+        if (holder != null && holder.getExecutor() instanceof SubExecutor subExecutor) subExecutor.setSafeEnd(true);
+        var select = holder != null ? type.build(holder.getExecutor(),executor) : executor;
         select.initialize();
-        player.openInventory(select.getInventory());
+        player.openInventory(select.getHolder().getInventory());
     }
 
     @Override
@@ -43,7 +40,7 @@ public class GuiManagerImpl implements GuiManager {
                 if (clicked == null) return;
                 var item = event.getCurrentItem();
                 if (item == null) item = AIR;
-                if (event.getView().getTopInventory().getHolder() instanceof GuiExecutor executor) {
+                if (event.getView().getTopInventory().getHolder() instanceof GuiHolder holder) {
                     MouseButton button;
                     if (event.isLeftClick()) {
                         button = event.isShiftClick() ? MouseButton.SHIFT_LEFT : MouseButton.LEFT;
@@ -52,7 +49,7 @@ public class GuiManagerImpl implements GuiManager {
                     } else {
                         button = MouseButton.OTHER;
                     }
-                    event.setCancelled(executor.onClick(
+                    event.setCancelled(holder.getExecutor().onClick(
                             clicked.equals(event.getWhoClicked().getInventory()),
                             item,
                             event.getSlot(),
@@ -62,14 +59,13 @@ public class GuiManagerImpl implements GuiManager {
             }
             @EventHandler
             public void close(InventoryCloseEvent event) {
-                if (event.getPlayer() instanceof Player player) {
-                    if (event.getView().getTopInventory().getHolder() instanceof GuiExecutor executor) {
-                        executor.onEnd();
-                        if (executor instanceof SubExecutor subExecutor && !subExecutor.isSafeEnd()) {
-                            Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(Objects.requireNonNull(subExecutor.getParent()).getInventory()), 1);
-                        }
-                        if (executor.getParent() instanceof SubExecutor subExecutor) subExecutor.setSafeEnd(false);
+                if (event.getPlayer() instanceof Player player && event.getView().getTopInventory().getHolder() instanceof GuiHolder holder) {
+                    var executor = holder.getExecutor();
+                    executor.onEnd();
+                    if (executor instanceof SubExecutor subExecutor && !subExecutor.isSafeEnd()) {
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(Objects.requireNonNull(subExecutor.getParent()).getHolder().getInventory()), 1);
                     }
+                    if (executor.getParent() instanceof SubExecutor subExecutor) subExecutor.setSafeEnd(false);
                 }
             }
         },plugin);
@@ -86,11 +82,11 @@ public class GuiManagerImpl implements GuiManager {
     }
     private static void closeInventory() {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            var exec = getExecutor(onlinePlayer);
-            if (exec != null) onlinePlayer.closeInventory();
+            var holder = getHolder(onlinePlayer);
+            if (holder != null) onlinePlayer.closeInventory();
         }
     }
-    private static GuiExecutor getExecutor(Player player) {
-        return player.getOpenInventory().getTopInventory().getHolder() instanceof GuiExecutor executor ? executor : null;
+    private static GuiHolder getHolder(Player player) {
+        return player.getOpenInventory().getTopInventory().getHolder() instanceof GuiHolder holder ? holder : null;
     }
 }

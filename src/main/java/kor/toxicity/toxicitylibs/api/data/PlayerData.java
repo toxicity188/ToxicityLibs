@@ -43,7 +43,7 @@ public class PlayerData {
         ToxicityLibs.getInstance().getGuiManager().openGui(viewer, new GuiExecutor(54,player instanceof Player online ? storageName.getResult(online) : storageName.getResult()) {
             @Override
             public void initialize() {
-                var inv = getInventory();
+                var inv = getHolder().getInventory();
                 var i = 0;
                 var now = LocalDateTime.now();
                 for (int t = 0; t < 54; t++) inv.setItem(t,null);
