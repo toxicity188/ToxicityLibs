@@ -6,11 +6,16 @@ import kor.toxicity.toxicitylibs.api.ToxicityPlugin;
 import kor.toxicity.toxicitylibs.api.command.CommandAPI;
 import kor.toxicity.toxicitylibs.api.command.SenderType;
 import kor.toxicity.toxicitylibs.api.util.TimeFormat;
+import kor.toxicity.toxicitylibs.platform.PaperPlatformAdapter;
+import kor.toxicity.toxicitylibs.platform.PlatformAdapter;
+import kor.toxicity.toxicitylibs.platform.SpigotPlatformAdapter;
 import kor.toxicity.toxicitylibs.plugin.util.ConfigUtil;
 import kor.toxicity.toxicitylibs.plugin.util.StringUtil;
 import kor.toxicity.toxicitylibs.api.data.ItemData;
 import kor.toxicity.toxicitylibs.api.data.PlayerData;
 import kor.toxicity.toxicitylibs.plugin.util.database.DatabaseSupplier;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -36,7 +41,16 @@ import java.util.function.Consumer;
 public final class ToxicityLibs extends ToxicityPlugin {
     private static ToxicityPlugin libs;
     private static final Map<UUID,PlayerThread> PLAYER_THREAD_MAP = new ConcurrentHashMap<>();
+    private static BukkitAudiences audiences;
+    private static final PlatformAdapter PLATFORM = Bukkit.getConsoleSender() instanceof Audience ? new PaperPlatformAdapter() : new SpigotPlatformAdapter();
 
+    public static PlatformAdapter getPlatform() {
+        return PLATFORM;
+    }
+
+    public static BukkitAudiences getAudiences() {
+        return audiences;
+    }
 
     private final CommandAPI commandAPI = new CommandAPI("<gradient:blue-aqua>[ToxicityLibs]")
             .setCommandPrefix("tc")
@@ -47,7 +61,7 @@ public final class ToxicityLibs extends ToxicityPlugin {
             .setUsage("parse <text>")
             .setPermission(new String[] {"toxicitylibs.parse"})
             .setLength(1)
-            .setExecutor((c,a) -> c.sendMessage(StringUtil.colored(String.join(" ",a))))
+            .setExecutor((c,a) -> audiences.sender(c).sendMessage(StringUtil.colored(String.join(" ",a))))
             .build()
             //reload
             .create("reload")
@@ -65,7 +79,7 @@ public final class ToxicityLibs extends ToxicityPlugin {
             .setPermission(new String[] {"toxicitylibs.placeholder"})
             .setLength(1)
             .setAllowedSender(new SenderType[] {SenderType.PLAYER})
-            .setExecutor((c,a) -> c.sendMessage(ReaderBuilder.placeholder(String.join(" ",a)).build().getResult((Player) c)))
+            .setExecutor((c,a) -> audiences.sender(c).sendMessage(ReaderBuilder.placeholder(String.join(" ",a)).build().getResult((Player) c)))
             .build()
             //give
             .create("give")
@@ -180,6 +194,7 @@ public final class ToxicityLibs extends ToxicityPlugin {
 
     private static void load(ToxicityPlugin plugin) {
         libs = plugin;
+        audiences = BukkitAudiences.create(plugin);
         Bukkit.getPluginManager().registerEvents(new Listener() {
             @EventHandler
             public void join(PlayerJoinEvent event) {

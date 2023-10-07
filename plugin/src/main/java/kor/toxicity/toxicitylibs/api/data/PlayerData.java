@@ -47,17 +47,18 @@ public class PlayerData {
                 var i = 0;
                 var now = LocalDateTime.now();
                 for (int t = 0; t < 54; t++) inv.setItem(t,null);
+                var platform = ToxicityLibs.getPlatform();
                 for (ItemData itemData : storageItem) {
 
                     var item = itemData.itemStack().clone();
                     var meta = item.getItemMeta();
 
                     if (itemData.leftTime() > 0) {
-                        var display = meta.displayName();
+                        var display = platform.getDisplay(meta);
                         if (display == null) display = Component.text(item.getType().toString());
-                        meta.displayName(display.append(Component.space()).append(Component.text(StringUtil.parseTimeFormat(itemData.leftTime() - ChronoUnit.SECONDS.between(itemData.time(),now))).color(NamedTextColor.GRAY)));
+                        platform.setDisplay(meta,display.append(Component.space()).append(Component.text(StringUtil.parseTimeFormat(itemData.leftTime() - ChronoUnit.SECONDS.between(itemData.time(),now))).color(NamedTextColor.GRAY)));
                     }
-                    var list = meta.lore();
+                    var list = platform.getLore(meta);
                     if (list == null) list = new ArrayList<>();
                     list.addAll(ToxicityConfig.INSTANCE.getStorageItemSuffix().stream().map(s -> player instanceof Player online ? s.getResult(online) : s.getResult()).toList());
 
@@ -79,9 +80,8 @@ public class PlayerData {
                     viewer.getInventory().addItem(item);
                     storageItem.remove(clickedSlot);
                     initialize();
-                    viewer.updateInventory();
                 } else {
-                    viewer.sendMessage(ToxicityConfig.INSTANCE.getInventorySmallMessage().getResult(viewer));
+                    ToxicityLibs.getAudiences().sender(viewer).sendMessage(ToxicityConfig.INSTANCE.getInventorySmallMessage().getResult(viewer));
                 }
                 return true;
             }

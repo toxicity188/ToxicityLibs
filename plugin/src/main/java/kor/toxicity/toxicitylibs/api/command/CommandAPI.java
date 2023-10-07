@@ -1,5 +1,6 @@
 package kor.toxicity.toxicitylibs.api.command;
 
+import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import kor.toxicity.toxicitylibs.plugin.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -223,7 +224,7 @@ public class CommandAPI {
         message(sender,Component.text(message).color(NamedTextColor.WHITE));
     }
     public void message(CommandSender sender, Component message) {
-        sender.sendMessage(prefix.append(Component.space().append(message)));
+        ToxicityLibs.getAudiences().sender(sender).sendMessage(prefix.append(Component.space().append(message)));
     }
 
     public void execute(CommandSender sender, String name, String[] args) {

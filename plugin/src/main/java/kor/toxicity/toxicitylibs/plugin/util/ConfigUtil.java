@@ -48,18 +48,19 @@ public class ConfigUtil {
             }
             var item = new ItemStack(material);
             var meta = item.getItemMeta();
-
-            meta.displayName(getAsString(c, "display").map(StringUtil::colored).orElse(null));
-            meta.lore(getAsStringList(c,"lore").map(l -> l.stream().map(StringUtil::colored).toList()).orElse(null));
-            meta.setUnbreakable(c.getBoolean("unbreakable"));
-            meta.setCustomModelData(c.getInt("custom-model-data"));
-            getAsStringList(c,"flag").ifPresent(l -> l.forEach(s -> {
-                try {
-                    meta.addItemFlags(ItemFlag.valueOf(s.toUpperCase()));
-                } catch (Exception e) {
-                    ToxicityLibs.warn("unable to read this flag: " + s);
-                }
-            }));
+            if (meta != null) {
+                ToxicityLibs.getPlatform().setDisplay(meta, getAsString(c, "display").map(StringUtil::colored).orElse(null));
+                ToxicityLibs.getPlatform().setLore(meta, getAsStringList(c, "lore").map(l -> l.stream().map(StringUtil::colored).toList()).orElse(null));
+                meta.setUnbreakable(c.getBoolean("unbreakable"));
+                meta.setCustomModelData(c.getInt("custom-model-data"));
+                getAsStringList(c, "flag").ifPresent(l -> l.forEach(s -> {
+                    try {
+                        meta.addItemFlags(ItemFlag.valueOf(s.toUpperCase()));
+                    } catch (Exception e) {
+                        ToxicityLibs.warn("unable to read this flag: " + s);
+                    }
+                }));
+            }
 
             item.setItemMeta(meta);
             return item;

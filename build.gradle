@@ -4,34 +4,43 @@ plugins {
     id 'maven-publish'
 }
 
-def pluginGroup = 'kor.toxicity'
-def pluginVersion = '1.0.2-SNAPSHOT'
+def pluginGroup = 'kor.toxicity.toxicitylibs'
+def pluginVersion = '1.0.3'
 
 group = pluginGroup
 version = pluginVersion
 
-repositories {
-    mavenCentral()
-    maven {
-        name = "papermc-repo"
-        url = "https://repo.papermc.io/repository/maven-public/"
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = "papermc-repo"
+            url = "https://repo.papermc.io/repository/maven-public/"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/groups/public/"
+        }
+        maven {
+            url = "https://jitpack.io"
+        }
     }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
-    }
-    maven {
-        url = "https://jitpack.io"
+    dependencies {
+        compileOnly("net.kyori:adventure-api:4.14.0")
+        compileOnly("net.kyori:adventure-platform-bukkit:4.3.1")
+
+        compileOnly(group: "com.github.PlaceholderAPI", name: "PlaceholderAPI", version: "master-SNAPSHOT")
+        implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
     }
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT"
-    compileOnly(group: "com.github.PlaceholderAPI", name: "PlaceholderAPI", version: "master-SNAPSHOT")
-    implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
-    compileOnly 'com.github.LoneDev6:API-ItemsAdder:3.5.0b'
-    compileOnly("com.github.oraxen:oraxen:1.160.0")
+    implementation(project(path: ":plugin", configuration: "shadow"))
 }
+
 
 def targetJavaVersion = 17
 java {

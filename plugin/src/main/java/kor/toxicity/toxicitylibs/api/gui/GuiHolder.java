@@ -1,7 +1,7 @@
 package kor.toxicity.toxicitylibs.api.gui;
 
+import kor.toxicity.toxicitylibs.plugin.ToxicityLibs;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class GuiHolder implements InventoryHolder {
     private final Inventory inventory;
     public GuiHolder(int size, Component name) {
-        this.inventory = Bukkit.createInventory(this, size, name);
+        this.inventory = ToxicityLibs.getPlatform().createInventory(this, size, name);
     }
 
     @NotNull

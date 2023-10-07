@@ -1,1 +1,5 @@
 rootProject.name = 'ToxicityLibs'
+
+include("plugin")
+include("platform:paper")
+include("platform:spigot")
