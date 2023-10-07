@@ -7,12 +7,16 @@ plugins {
 def pluginGroup = 'kor.toxicity.toxicitylibs'
 def pluginVersion = '1.0.3'
 
-group = pluginGroup
-version = pluginVersion
+def adventureVersion = '4.14.0'
+def platformVersion = '4.3.1'
+
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'com.github.johnrengelman.shadow'
+
+    group = pluginGroup
+    version = pluginVersion
 
     repositories {
         mavenCentral()
@@ -29,11 +33,19 @@ allprojects {
         }
     }
     dependencies {
-        compileOnly("net.kyori:adventure-api:4.14.0")
-        compileOnly("net.kyori:adventure-platform-bukkit:4.3.1")
+        compileOnly("net.kyori:adventure-api:$adventureVersion")
+        compileOnly("net.kyori:adventure-platform-bukkit:$platformVersion")
 
         compileOnly(group: "com.github.PlaceholderAPI", name: "PlaceholderAPI", version: "master-SNAPSHOT")
         implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
+    }
+    processResources {
+        def props = [version: version, adventure: adventureVersion, platform: platformVersion]
+        inputs.properties props
+        filteringCharset 'UTF-8'
+        filesMatching('plugin.yml') {
+            expand props
+        }
     }
 }
 
@@ -61,14 +73,6 @@ jar {
     finalizedBy shadowJar
 }
 
-processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
-    }
-}
 
 afterEvaluate {
     publishing {

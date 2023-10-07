@@ -7,6 +7,9 @@ softdepend:
   - PlaceholderAPI
   - ItemsAdder
   - Oraxen
+libraries:
+  - "net.kyori:adventure-api:${adventure}"
+  - "net.kyori:adventure-platform-bukkit:${platform}"
 commands:
   toxicity:
     aliases:
