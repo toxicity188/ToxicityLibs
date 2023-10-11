@@ -48,7 +48,7 @@ public class CommandAPI {
     }
 
     private final CommandAPIBuilder helpBuilder;
-    public CommandAPI(Component prefix, CommandAPI superAPI) {
+    public CommandAPI(@NotNull Component prefix, @NotNull CommandAPI superAPI) {
         this.prefix = prefix;
         this.superAPI = superAPI;
         helpBuilder = create("help")
@@ -59,68 +59,68 @@ public class CommandAPI {
                 ;
     }
 
-    public CommandAPIBuilder getHelpBuilder() {
+    public @NotNull CommandAPIBuilder getHelpBuilder() {
         return helpBuilder;
     }
 
-    public CommandAPI getSuperAPI() {
+    public @NotNull CommandAPI getSuperAPI() {
         return superAPI;
     }
 
-    public CommandAPI setUnknownCommandMessage(String unknownCommandMessage) {
+    public @NotNull CommandAPI setUnknownCommandMessage(@NotNull String unknownCommandMessage) {
         this.unknownCommandMessage = StringUtil.colored(unknownCommandMessage);
         return this;
     }
 
-    public CommandAPI setNotAllowedSenderMessage(Component notAllowedSenderMessage) {
+    public @NotNull CommandAPI setNotAllowedSenderMessage(@NotNull Component notAllowedSenderMessage) {
         this.notAllowedSenderMessage = notAllowedSenderMessage;
         return this;
     }
 
-    public CommandAPI setNotCommandMessage(Component notCommandMessage) {
+    public @NotNull CommandAPI setNotCommandMessage(@NotNull Component notCommandMessage) {
         this.notCommandMessage = notCommandMessage;
         return this;
     }
 
-    public CommandAPI setOpOnlyCommandMessage(Component opOnlyCommandMessage) {
+    public @NotNull CommandAPI setOpOnlyCommandMessage(@NotNull Component opOnlyCommandMessage) {
         this.opOnlyCommandMessage = opOnlyCommandMessage;
         return this;
     }
 
-    public CommandAPI setPermissionRequiredMessage(Component permissionRequiredMessage) {
+    public @NotNull CommandAPI setPermissionRequiredMessage(@NotNull Component permissionRequiredMessage) {
         this.permissionRequiredMessage = permissionRequiredMessage;
         return this;
     }
 
-    public CommandAPI setUnknownCommandMessage(Component unknownMessage) {
+    public @NotNull CommandAPI setUnknownCommandMessage(@NotNull Component unknownMessage) {
         this.unknownCommandMessage = unknownMessage;
         return this;
     }
 
-    public CommandAPI setNotCommandMessage(String notCommandMessage) {
+    public @NotNull CommandAPI setNotCommandMessage(@NotNull String notCommandMessage) {
         this.notCommandMessage = StringUtil.colored(notCommandMessage);
         return this;
     }
 
-    public CommandAPI setPermissionRequiredMessage(String permissionRequiredMessage) {
+    public @NotNull CommandAPI setPermissionRequiredMessage(@NotNull String permissionRequiredMessage) {
         this.permissionRequiredMessage = StringUtil.colored(permissionRequiredMessage);
         return this;
     }
 
-    public CommandAPI setOpOnlyCommandMessage(String opOnlyCommandMessage) {
+    public @NotNull CommandAPI setOpOnlyCommandMessage(@NotNull String opOnlyCommandMessage) {
         this.opOnlyCommandMessage = StringUtil.colored(opOnlyCommandMessage);
         return this;
     }
 
-    public CommandAPI setNotAllowedSenderMessage(String notAllowedSenderMessage) {
+    public @NotNull CommandAPI setNotAllowedSenderMessage(@NotNull String notAllowedSenderMessage) {
         this.notAllowedSenderMessage = StringUtil.colored(notAllowedSenderMessage);
         return this;
     }
 
-    public CommandAPIBuilder create(String name) {
+    public @NotNull CommandAPIBuilder create(@NotNull String name) {
         return new CommandAPIBuilder(name);
     }
-    public CommandAPI createSubBranches(String name, String[] aliases, String description, String[] permission, SenderType[] allowedSender, boolean opOnly) {
+    public @NotNull CommandAPI createSubBranches(@NotNull String name, @NotNull String[] aliases, @NotNull String description, @NotNull String[] permission, @NotNull SenderType[] allowedSender, boolean opOnly) {
         var api = new CommandAPI(prefix,this);
         api.commandPrefix = commandPrefix;
 
@@ -166,7 +166,7 @@ public class CommandAPI {
             }
 
             @Override
-            public void execute(CommandSender sender, String[] args) {
+            public void execute(CommandAPI api1, CommandSender sender, String[] args) {
                 if (args.length == 0) {
                     api.message(sender,api.notCommandMessage);
                 } else {
@@ -175,24 +175,24 @@ public class CommandAPI {
                         var r = removeFirst(args);
                         if (r.length < module.length()) {
                             api.message(sender, Component.text("usage: " + module.usage()));
-                        } else module.execute(sender, r);
+                        } else module.execute(api1, sender, r);
                     }
                 }
             }
 
             @Override
-            public @Nullable List<String> tabComplete(CommandSender sender, String[] args) {
+            public @Nullable List<String> tabComplete(CommandAPI api1, CommandSender sender, String[] args) {
                 return switch (args.length) {
                     case 0 -> null;
                     case 1 -> api.moduleMap.keySet().stream().filter(s -> s.startsWith(args[0])).toList();
-                    default -> Optional.ofNullable(api.getModule(sender, args[0], false)).map(m -> m.tabComplete(sender,removeFirst(args))).orElse(null);
+                    default -> Optional.ofNullable(api.getModule(sender, args[0], false)).map(m -> m.tabComplete(api1, sender,removeFirst(args))).orElse(null);
                 };
             }
         });
         return api;
     }
 
-    public TabExecutor createTabExecutor() {
+    public @NotNull TabExecutor createTabExecutor() {
         return new TabExecutor() {
             @Override
             public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -204,7 +204,7 @@ public class CommandAPI {
                         var r = removeFirst(args);
                         if (r.length < module.length()) {
                             message(sender, Component.text("usage: " + module.usage()));
-                        } else module.execute(sender, r);
+                        } else module.execute(CommandAPI.this, sender, r);
                     }
                 }
                 return true;
@@ -215,23 +215,23 @@ public class CommandAPI {
                 return switch (args.length) {
                     case 0 -> null;
                     case 1 -> moduleMap.keySet().stream().filter(s -> s.startsWith(args[0])).toList();
-                    default -> Optional.ofNullable(getModule(sender, args[0], false)).map(m -> m.tabComplete(sender,removeFirst(args))).orElse(null);
+                    default -> Optional.ofNullable(getModule(sender, args[0], false)).map(m -> m.tabComplete(CommandAPI.this, sender,removeFirst(args))).orElse(null);
                 };
             }
         };
     }
-    public void message(CommandSender sender, String message) {
+    public void message(@NotNull CommandSender sender, @NotNull String message) {
         message(sender,Component.text(message).color(NamedTextColor.WHITE));
     }
-    public void message(CommandSender sender, Component message) {
+    public void message(@NotNull CommandSender sender, @NotNull Component message) {
         ToxicityLibs.getAudiences().sender(sender).sendMessage(prefix.append(Component.space().append(message)));
     }
 
-    public void execute(CommandSender sender, String name, String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String name, @NotNull String[] args) {
         var module = getModule(sender, name, true);
-        if (module != null) module.execute(sender, args);
+        if (module != null) module.execute(this, sender, args);
     }
-    public CommandModule getModule(CommandSender sender, String name, boolean message) {
+    private @Nullable CommandModule getModule(@NotNull CommandSender sender, @NotNull String name, boolean message) {
         var module = moduleMap.get(name);
         if (module == null) module = moduleMap.values().stream().filter(m -> {
             var b = false;
@@ -284,60 +284,64 @@ public class CommandAPI {
         private String[] permission = EMPTY_ARRAY;
         private boolean opOnly = false;
         private int length = 0;
-        private BiConsumer<CommandSender,String[]> executor = (s,a) -> {};
-        private BiFunction<CommandSender,String[], List<String>> tabCompleter = (s,a) -> null;
+        private CommandAPIExecutor executor = (api,s,a) -> {};
+        private CommandAPITabCompleter tabCompleter = (api,s,a) -> null;
 
         private final String name;
-        private CommandAPIBuilder(String name) {
+        private CommandAPIBuilder(@NotNull String name) {
             this.name = name;
         }
 
-        public CommandAPIBuilder setAliases(String[] aliases) {
+        public @NotNull CommandAPIBuilder setAliases(@NotNull String[] aliases) {
             this.aliases = aliases;
             return this;
         }
 
-        public CommandAPIBuilder setAllowedSender(SenderType[] allowedSender) {
+        public @NotNull CommandAPIBuilder setAllowedSender(@NotNull SenderType[] allowedSender) {
             this.allowedSender = allowedSender;
             return this;
         }
 
-        public CommandAPIBuilder setDescription(String description) {
+        public @NotNull CommandAPIBuilder setDescription(@NotNull String description) {
             this.description = description;
             return this;
         }
 
-        public CommandAPIBuilder setExecutor(BiConsumer<CommandSender, String[]> executor) {
+        public @NotNull CommandAPIBuilder setExecutor(@NotNull BiConsumer<@NotNull CommandSender, @NotNull String[]> executor) {
+            this.executor = (api, sender, args) -> executor.accept(sender, args);
+            return this;
+        }
+        public @NotNull CommandAPIBuilder setExecutor(@NotNull CommandAPIExecutor executor) {
             this.executor = executor;
             return this;
         }
 
-        public CommandAPIBuilder setOpOnly(boolean opOnly) {
+        public @NotNull CommandAPIBuilder setOpOnly(boolean opOnly) {
             this.opOnly = opOnly;
             return this;
         }
 
-        public CommandAPIBuilder setPermission(String[] permission) {
+        public @NotNull CommandAPIBuilder setPermission(@NotNull String[] permission) {
             this.permission = permission;
             return this;
         }
 
-        public CommandAPIBuilder setTabCompleter(BiFunction<CommandSender, String[], List<String>> tabCompleter) {
-            this.tabCompleter = tabCompleter;
+        public @NotNull CommandAPIBuilder setTabCompleter(@NotNull BiFunction<@NotNull CommandSender, @NotNull String[], @Nullable List<String>> tabCompleter) {
+            this.tabCompleter = ((api, sender, args) -> tabCompleter.apply(sender, args));
             return this;
         }
 
-        public CommandAPIBuilder setUsage(String usage) {
+        public @NotNull CommandAPIBuilder setUsage(@NotNull String usage) {
             this.usage = usage;
             return this;
         }
 
-        public CommandAPIBuilder setLength(int length) {
+        public @NotNull CommandAPIBuilder setLength(int length) {
             this.length = length;
             return this;
         }
 
-        public CommandAPI build() {
+        public @NotNull CommandAPI build() {
             moduleMap.put(name, new CommandModule() {
                 @Override
                 public String[] aliases() {
@@ -370,13 +374,13 @@ public class CommandAPI {
                 }
 
                 @Override
-                public void execute(CommandSender sender, String[] args) {
-                    executor.accept(sender,args);
+                public void execute(CommandAPI api, CommandSender sender, String[] args) {
+                    executor.execute(api, sender,args);
                 }
 
                 @Override
-                public @Nullable List<String> tabComplete(CommandSender sender, String[] args) {
-                    return tabCompleter.apply(sender,args);
+                public @Nullable List<String> tabComplete(CommandAPI api, CommandSender sender, String[] args) {
+                    return tabCompleter.complete(api, sender,args);
                 }
 
                 @Override

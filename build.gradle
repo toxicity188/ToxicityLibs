@@ -5,7 +5,7 @@ plugins {
 }
 
 def pluginGroup = 'kor.toxicity.toxicitylibs'
-def pluginVersion = '1.0.3'
+def pluginVersion = '1.0.4'
 
 def adventureVersion = '4.14.0'
 def platformVersion = '4.3.1'

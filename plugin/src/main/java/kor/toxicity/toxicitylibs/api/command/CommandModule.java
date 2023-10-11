@@ -13,7 +13,7 @@ public interface CommandModule {
     boolean opOnly();
     String[] permission();
     int length();
-    void execute(CommandSender sender, String[] args);
+    void execute(CommandAPI api, CommandSender sender, String[] args);
     @Nullable
-    List<String> tabComplete(CommandSender sender, String[] args);
+    List<String> tabComplete(CommandAPI api, CommandSender sender, String[] args);
 }
